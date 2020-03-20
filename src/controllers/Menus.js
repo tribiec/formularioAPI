@@ -16,9 +16,9 @@ class Menus {
     static async insertMenus(req, res) {
         const db = new database();
         const menus = await db.query({}, "menus").then(e => e);
-        const { dest, id, name, label, type, maxlength, minlength } = req.body;
+        const { dest, name } = req.body;
         if (dest === 0) {
-            db.insert({ id, name, label, type, maxlength, minlength }, 'menus');
+            db.insert({ id, name, type, childrens: [] }, 'menus');
         } else {
             const temp = Finder(menus, dest)[0];
             temp.childrens.push({ a: 1 });
