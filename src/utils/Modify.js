@@ -10,15 +10,8 @@ const Modify = (data, id, value) => {
                 resp.push({...dato, ...value });
             } else if (dato.id != id && dato.childrens) {
                 const a = look(dato.childrens, id);
-                console.log("-------------");
-                console.log("a");
-                console.log(a);
-                console.log("-------------");
-                console.log("dato:");
-                console.log(dato);
-                console.log("-------------");
                 if (a.length > 0) {
-                    resp.push(a)
+                    resp.push(a);
                 } else {
                     resp.push(dato)
                 }
