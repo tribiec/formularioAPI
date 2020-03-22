@@ -7,11 +7,11 @@ import Users from "../controllers/Users";
 const router = express.Router();
 
 router.get("/menus", Menus.getMenus);
-router.post("/menus", Menus.insertMenus);
-router.get("/formulario/:id", Forms.getForm);
-router.post("/formulario", Forms.insertForm);
-router.post("/borrar", Menus.borrar);
-router.post('/check', SearchToken, Users.checkLogin);
-router.post('/login', Users.Login);
+router.post("/menus", Menus.insertMenu);
+router.get("/formulario/:id");
+router.post("/formulario");
+router.post("/borrar");
+router.post("/check");
+router.post("/login");
 
 export default router;

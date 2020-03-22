@@ -1,60 +1,79 @@
-import database from "../database";
-import Finder from "../utils/Finder";
-import Modify from "../utils/Modify";
-
+import db from "../database";
+import { add, modify, retire, get } from "../utils/MenuUtils";
 class Menus {
-    static async getMenus(req, res) {
-        const db = new database();
-        const resp = await db.query({}, "menus").then(e => e);
-        res.json({
-            status: 200,
-            message: [...resp]
-        });
+    static async getMenu(req, res) {}
+
+    static getMenus(req, res) {
+        db.collection("menus")
+            .find({})
+            .toArray((err, result) => {
+                if (err) return [];
+                res
+                    .json({
+                        status: 200,
+                        message: result
+                    })
+                    .status(200);
+            });
     }
 
-    static async insertMenus(req, res) {
-        const db = new database();
-        const menus = await db.query({}, "menus").then(e => e);
-        const id = Math.floor(Math.random() * (500 - 1 + 1) + 1);
+    static async insertMenu(req, res) {
         const { dest, name } = req.body;
-        const model = { id, name, type: 1, childrens: [] };
-        if (dest === 0) {
-            db.insert(model, "menus").then((e, error) => {
-                if (error) {
-                    res.json({ status: 500, message: "Error al insertar Categoria" });
-                } else {
-                    res.json({ status: 200, message: [e] });
-                }
+        const dir = dest.split(":");
+        const collection = db.collection("menus");
+        const menus = await collection
+            .find({})
+            .toArray()
+            .then(e => e)
+            .catch(__err => {
+                res
+                    .json({
+                        status: 404,
+                        status: "Problem with the DB"
+                    })
+                    .status(404);
             });
-            console.log("Menu Insertado...", { id, name, type: 1, childrens: [] });
+
+        if (dir.length === 1 && dir[0] === "0") {
+            collection.insertOne({
+                    id: menus.length + 1,
+                    name,
+                    childrens: []
+                },
+                err => {
+                    if (!err) {
+                        res
+                            .json({
+                                status: 200,
+                                status: "Exito"
+                            })
+                            .status(200);
+                    }
+                }
+            );
         } else {
-            console.log(menus);
-            const temp = Finder(menus, dest)[0];
-            console.log("---------------------");
-            console.log(temp);
-            const response = Modify(menus, dest, {});
-            console.log(response);
-            // console.log(response);
-            // db.drop('menus').then(e => {
-            //     db.insert(response, 'menus').then(e => {
-            //         if (e) {
-            //             res.json({ status: 500, message: "Error al insertar menu" });
-            //         } else {
-            //             res.json({ status: 200, message: "Menu agregado con exito" });
-            //         }
-            //     });
-            // });
+            const final = add(menus, dest, { name, childrens: [] });
+            console.log(final[0].childrens);
+            await collection.deleteMany({});
+            await collection.insertMany(final);
+            res
+                .json({
+                    status: 200,
+                    message: "Item agregado exitosamente"
+                })
+                .status(200);
         }
     }
 
-    static async borrar() {
-        const db = new database();
-        db.drop("menus").then(e => {
-            console.log("Borrado Menus...");
-        });
-        db.drop("forms").then(e => {
-            console.log("Borrado Menus...");
-        });
+    static async borrarMenu(req, res) {}
+
+    static async borrarMenus(req, res) {
+        db.collection('menus').removeMany({}).then(e => {
+            res.json({
+                status: 200,
+                message: "Items borrados..."
+            }).status(200);
+        })
     }
 }
 
