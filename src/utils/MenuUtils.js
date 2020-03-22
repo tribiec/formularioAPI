@@ -7,7 +7,7 @@ const add = (actual, id_dest, data) => {
                 actual.push({...data, id: actual.length + 1 });
             } else {
                 temp = temp[niveles[0] - 1];
-                temp.childrens.push({...data, id: actual.length + ":" + 1 });
+                temp.childrens.push({...data, id: temp.id + ":" + (temp.childrens.length + 1) });
             }
         } else {
             niveles.forEach((nivel, i) => {
@@ -23,7 +23,7 @@ const add = (actual, id_dest, data) => {
             });
         }
     } catch (exc) {
-        console.log("Error al agregar....");
+        console.log("Error al agregar en MenuUtils....");
     }
 
     return actual;
@@ -85,10 +85,8 @@ const modify = (data, dest, input) => {
                 } else if (i + 1 === niveles.length) {
                     resp = resp.childrens[nivel - 1];
                     for (const i in input) {
-                        // console.log(i);
                         resp[i] = input[i];
                     }
-                    // resp = {...resp, ...input };
                 } else {
                     resp = resp.childrens[nivel - 1];
                 }

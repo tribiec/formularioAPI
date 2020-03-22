@@ -1,5 +1,6 @@
 import db from "../database";
 import { add, modify, retire, get } from "../utils/MenuUtils";
+import resolver from "../utils/resolvers";
 class Menus {
     static async getMenu(req, res) {}
 
@@ -8,17 +9,14 @@ class Menus {
             .find({})
             .toArray((err, result) => {
                 if (err) return [];
-                res
-                    .json({
-                        status: 200,
-                        message: result
-                    })
-                    .status(200);
+                resolver(200, result, res);
             });
     }
 
     static async insertMenu(req, res) {
         const { dest, name } = req.body;
+        const form_id = (req.form_id) ? req.form_id : req.body.form_id;
+        const customChildrens = form_id ? { form_id } : { childrens: [] };
         const dir = dest.split(":");
         const collection = db.collection("menus");
         const menus = await collection
@@ -26,54 +24,41 @@ class Menus {
             .toArray()
             .then(e => e)
             .catch(__err => {
-                res
-                    .json({
-                        status: 404,
-                        status: "Problem with the DB"
-                    })
-                    .status(404);
+                resolver(100, "Problem with the DB", res);
             });
 
         if (dir.length === 1 && dir[0] === "0") {
             collection.insertOne({
                     id: menus.length + 1,
                     name,
-                    childrens: []
+                    ...customChildrens
                 },
                 err => {
                     if (!err) {
-                        res
-                            .json({
-                                status: 200,
-                                status: "Exito"
-                            })
-                            .status(200);
+                        resolver(200, "Item agregado con exito", res);
                     }
                 }
             );
         } else {
-            const final = add(menus, dest, { name, childrens: [] });
-            console.log(final[0].childrens);
+            const final = add(menus, dest, { name, ...customChildrens });
             await collection.deleteMany({});
             await collection.insertMany(final);
-            res
-                .json({
-                    status: 200,
-                    message: "Item agregado exitosamente"
-                })
-                .status(200);
+            resolver(200, "Item agregado con exito", res);
         }
     }
 
     static async borrarMenu(req, res) {}
 
     static async borrarMenus(req, res) {
-        db.collection('menus').removeMany({}).then(e => {
-            res.json({
-                status: 200,
-                message: "Items borrados..."
-            }).status(200);
-        })
+        db.collection("menus")
+            .removeMany({})
+            .then(e => {
+                db.collection("forms")
+                    .removeMany({})
+                    .then(e => {
+                        resolver(200, "Items borrados...", res);
+                    });
+            });
     }
 }
 

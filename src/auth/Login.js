@@ -17,7 +17,6 @@ const loginUser = async({ correo, clave }, res) => {
     } else {
         query = query[0]
             //* Acceso Correcto
-        console.log(query.clave, clave);
         if (query.clave == clave) {
             delete query.clave, delete query.super_user;
             createToken(query, (err, token) => {
